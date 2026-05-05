@@ -1,0 +1,488 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Academic Risk Predictor{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-5">
+    <!-- Header Section -->
+    <div class="row mb-5">
+        <div class="col-lg-8">
+            <h1 class="display-4 fw-bold mb-2">
+                <i class="fas fa-chart-line text-gradient me-3"></i>Student Risk Assessment
+            </h1>
+            <p class="text-muted fs-5">Welcome back, <strong>{{ user }}</strong>! Analyze and predict academic risk.</p>
+        </div>
+        <div class="col-lg-4 text-end">
+            <div class="quick-stats">
+                <small class="text-muted">Last Updated:</small><br>
+                <span class="fs-6 fw-bold" id="timestamp">-</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="row g-4">
+        <!-- Prediction Form Section -->
+        <div class="col-lg-6">
+            <div class="card card-elevated h-100">
+                <div class="card-header bg-gradient py-4">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-user-check me-2"></i>Predict Student Risk
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form id="predictionForm" class="needs-validation">
+                        <!-- Personal Information -->
+                        <div class="section-title mt-4 mb-3">
+                            <i class="fas fa-id-card me-2"></i>Personal Information
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label">Age</label>
+                                <input type="number" class="form-control" id="age" name="age" min="15" max="30" placeholder="18" required>
+                                <small class="form-text text-muted">15-30 years</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Gender</label>
+                                <select class="form-select" id="gender" name="gender" required>
+                                    <option value="">Select...</option>
+                                    <option value="0">Male</option>
+                                    <option value="1">Female</option>
+                                    <option value="2">Other</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label">Ethnicity</label>
+                                <select class="form-select" id="ethnicity" name="ethnicity" required>
+                                    <option value="">Select...</option>
+                                    <option value="0">Caucasian</option>
+                                    <option value="1">Asian</option>
+                                    <option value="2">Hispanic</option>
+                                    <option value="3">African American</option>
+                                    <option value="4">Other</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Parental Education</label>
+                                <select class="form-select" id="parental_education" name="parental_education" required>
+                                    <option value="">Select...</option>
+                                    <option value="0">High School</option>
+                                    <option value="1">Bachelor's</option>
+                                    <option value="2">Master's</option>
+                                    <option value="3">PhD</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Academic Information -->
+                        <div class="section-title mt-4 mb-3">
+                            <i class="fas fa-book me-2"></i>Academic Information
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label">Study Time (hrs/week)</label>
+                                <input type="number" class="form-control" id="study_time" name="study_time" min="0" max="50" placeholder="10" step="0.5" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Absences (per year)</label>
+                                <input type="number" class="form-control" id="absences" name="absences" min="0" max="100" placeholder="5" required>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label">Tutoring</label>
+                                <select class="form-select" id="tutoring" name="tutoring" required>
+                                    <option value="">Select...</option>
+                                    <option value="0">No</option>
+                                    <option value="1">Yes</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Parental Support</label>
+                                <select class="form-select" id="parental_support" name="parental_support" required>
+                                    <option value="">Select...</option>
+                                    <option value="0">Low</option>
+                                    <option value="1">Medium</option>
+                                    <option value="2">High</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Activities -->
+                        <div class="section-title mt-4 mb-3">
+                            <i class="fas fa-star me-2"></i>Extracurricular Activities
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label">Extracurricular</label>
+                                <select class="form-select" id="extracurricular" name="extracurricular" required>
+                                    <option value="">Select...</option>
+                                    <option value="0">No</option>
+                                    <option value="1">Yes</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Sports</label>
+                                <select class="form-select" id="sports" name="sports" required>
+                                    <option value="">Select...</option>
+                                    <option value="0">No</option>
+                                    <option value="1">Yes</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label">Music</label>
+                                <select class="form-select" id="music" name="music" required>
+                                    <option value="">Select...</option>
+                                    <option value="0">No</option>
+                                    <option value="1">Yes</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Volunteering</label>
+                                <select class="form-select" id="volunteering" name="volunteering" required>
+                                    <option value="">Select...</option>
+                                    <option value="0">No</option>
+                                    <option value="1">Yes</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-gradient btn-lg w-100">
+                            <i class="fas fa-magic me-2"></i>Predict Risk
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div class="col-lg-6">
+            <!-- Prediction Result Card -->
+            <div class="card card-elevated mb-4" id="resultCard" style="display: none;">
+                <div class="card-header bg-gradient py-4">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-lightbulb me-2"></i>Prediction Result
+                    </h5>
+                </div>
+                <div class="card-body text-center">
+                    <div class="result-display mb-4">
+                        <div class="risk-badge" id="riskBadge">-</div>
+                        <p class="text-muted small mb-0" id="riskLabel">-</p>
+                    </div>
+
+                    <div class="risk-meter mb-4">
+                        <div class="meter-container">
+                            <div class="meter-fill" id="meterFill"></div>
+                        </div>
+                        <div class="d-flex justify-content-between text-muted small mt-2">
+                            <span>Low Risk</span>
+                            <span id="riskPercentage">0%</span>
+                            <span>High Risk</span>
+                        </div>
+                    </div>
+
+                    <div class="info-box mb-4">
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <small class="text-muted d-block mb-1">Risk Score</small>
+                                <h4 class="mb-0" id="riskScore">-</h4>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted d-block mb-1">Confidence</small>
+                                <h4 class="mb-0" id="confidence">-</h4>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info mb-0" id="recommendation">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <span id="recommendationText">Analyzing...</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Score Trend Card -->
+            <div class="card card-elevated mb-4" id="trendCard" style="display: none;">
+                <div class="card-header bg-gradient py-4">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-chart-area me-2"></i>Score Trend
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="trend-indicator" id="trendIndicator">
+                        <div class="text-center mb-3">
+                            <div id="trendIcon" class="fs-1 mb-2">📈</div>
+                            <p id="trendText" class="fw-bold mb-1">-</p>
+                            <p id="trendChange" class="small text-muted">-</p>
+                        </div>
+                    </div>
+                    <div class="trend-stats">
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <small class="text-muted d-block">Previous Score</small>
+                                <h6 id="previousScore">-</h6>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted d-block">Current Score</small>
+                                <h6 id="currentScore">-</h6>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Previous Scores Card -->
+            <div class="card card-elevated">
+                <div class="card-header bg-gradient py-4">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-history me-2"></i>Prediction History
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="scoresList" class="score-history">
+                        <p class="text-muted text-center py-3">No predictions yet. Make your first prediction above!</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Info -->
+            <div class="card card-elevated mt-4">
+                <div class="card-header bg-gradient py-3">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-bell me-2"></i>About This System
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p class="small text-muted mb-2">
+                        This prediction system uses advanced XGBoost machine learning to identify students at academic risk based on 12 key factors including study habits, attendance, and extracurricular involvement.
+                    </p>
+                    <p class="small text-muted mb-0">
+                        Early identification allows educators and counselors to provide targeted support and interventions to help students succeed.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Initialize score history from localStorage
+    let scoreHistory = JSON.parse(localStorage.getItem('scoreHistory') || '[]');
+
+    document.getElementById('predictionForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        // Collect form data
+        const formData = {
+            age: parseFloat(document.getElementById('age').value),
+            gender: parseFloat(document.getElementById('gender').value),
+            ethnicity: parseFloat(document.getElementById('ethnicity').value),
+            parental_education: parseFloat(document.getElementById('parental_education').value),
+            study_time: parseFloat(document.getElementById('study_time').value),
+            absences: parseFloat(document.getElementById('absences').value),
+            tutoring: parseFloat(document.getElementById('tutoring').value),
+            parental_support: parseFloat(document.getElementById('parental_support').value),
+            extracurricular: parseFloat(document.getElementById('extracurricular').value),
+            sports: parseFloat(document.getElementById('sports').value),
+            music: parseFloat(document.getElementById('music').value),
+            volunteering: parseFloat(document.getElementById('volunteering').value)
+        };
+
+        try {
+            const response = await fetch('{{ url_for("predict") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            });
+
+            const data = await response.json();
+
+            if (data.error) {
+                alert('Error: ' + data.error);
+                return;
+            }
+
+            // Display results
+            displayResults(data);
+            
+            // Add to history
+            addToHistory(data);
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Failed to make prediction');
+        }
+    });
+
+    function displayResults(data) {
+        const resultCard = document.getElementById('resultCard');
+        const riskBadge = document.getElementById('riskBadge');
+        const riskLabel = document.getElementById('riskLabel');
+        const meterFill = document.getElementById('meterFill');
+        const riskPercentage = document.getElementById('riskPercentage');
+        const riskScore = document.getElementById('riskScore');
+        const confidence = document.getElementById('confidence');
+        const recommendation = document.getElementById('recommendation');
+        const recommendationText = document.getElementById('recommendationText');
+
+        const riskPct = data.risk_score;
+
+        // Update badge
+        if (data.risk === 'At Risk') {
+            riskBadge.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i>AT RISK';
+            riskBadge.className = 'risk-badge risk-high';
+            recommendation.className = 'alert alert-danger mb-0';
+            recommendationText.innerHTML = '<strong>Action Required:</strong> This student shows indicators of academic risk. Recommend immediate intervention and support.';
+        } else {
+            riskBadge.innerHTML = '<i class="fas fa-check-circle me-2"></i>SAFE';
+            riskBadge.className = 'risk-badge risk-low';
+            recommendation.className = 'alert alert-success mb-0';
+            recommendationText.innerHTML = '<strong>Good News:</strong> This student is performing well. Continue monitoring and provide guidance as needed.';
+        }
+
+        riskLabel.textContent = data.risk;
+        meterFill.style.width = riskPct + '%';
+        meterFill.style.background = riskPct > 50 ? '#e74c3c' : '#27ae60';
+        riskPercentage.textContent = riskPct.toFixed(2) + '%';
+        riskScore.textContent = riskPct.toFixed(2) + '%';
+        confidence.textContent = data.confidence.toFixed(2) + '%';
+
+        resultCard.style.display = 'block';
+        resultCard.scrollIntoView({ behavior: 'smooth' });
+
+        document.getElementById('timestamp').textContent = new Date(data.timestamp).toLocaleString();
+    }
+
+    function addToHistory(data) {
+        // Add new score to history
+        const scoreEntry = {
+            score: data.risk_score,
+            risk: data.risk,
+            confidence: data.confidence,
+            timestamp: data.timestamp
+        };
+
+        scoreHistory.unshift(scoreEntry); // Add to beginning (most recent first)
+        
+        // Keep only last 10 predictions
+        if (scoreHistory.length > 10) {
+            scoreHistory.pop();
+        }
+
+        // Save to localStorage
+        localStorage.setItem('scoreHistory', JSON.stringify(scoreHistory));
+
+        // Update display
+        updateScoresList();
+        updateTrendAnalysis();
+    }
+
+    function updateScoresList() {
+        const scoresList = document.getElementById('scoresList');
+
+        if (scoreHistory.length === 0) {
+            scoresList.innerHTML = '<p class="text-muted text-center py-3">No predictions yet. Make your first prediction above!</p>';
+            return;
+        }
+
+        let html = '<div class="score-item-list">';
+
+        scoreHistory.forEach((entry, index) => {
+            const badgeColor = entry.risk === 'At Risk' ? 'danger' : 'success';
+            const icon = entry.risk === 'At Risk' ? 'fa-exclamation-triangle' : 'fa-check-circle';
+            const date = new Date(entry.timestamp);
+            const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const dateStr = date.toLocaleDateString();
+
+            html += `
+                <div class="score-item mb-3 p-3 border rounded">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <span class="badge bg-${badgeColor}">
+                                    <i class="fas ${icon} me-1"></i>${entry.risk}
+                                </span>
+                                <strong>${entry.score.toFixed(2)}%</strong>
+                            </div>
+                            <small class="text-muted">${dateStr} at ${timeStr}</small>
+                        </div>
+                        <div class="text-end">
+                            <small class="text-muted">Confidence: ${entry.confidence.toFixed(2)}%</small>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        html += '</div>';
+        scoresList.innerHTML = html;
+    }
+
+    function updateTrendAnalysis() {
+        const trendCard = document.getElementById('trendCard');
+
+        if (scoreHistory.length < 2) {
+            trendCard.style.display = 'none';
+            return;
+        }
+
+        trendCard.style.display = 'block';
+
+        const currentScore = scoreHistory[0].score;
+        const previousScore = scoreHistory[1].score;
+        const difference = currentScore - previousScore;
+        const percentChange = ((difference / previousScore) * 100).toFixed(1);
+
+        const trendIcon = document.getElementById('trendIcon');
+        const trendText = document.getElementById('trendText');
+        const trendChange = document.getElementById('trendChange');
+        const previousScoreEl = document.getElementById('previousScore');
+        const currentScoreEl = document.getElementById('currentScore');
+
+        // Update scores
+        previousScoreEl.textContent = previousScore.toFixed(2) + '%';
+        currentScoreEl.textContent = currentScore.toFixed(2) + '%';
+
+        // Determine trend
+        if (difference > 0) {
+            // Risk increasing (bad trend)
+            trendIcon.innerHTML = '📈';
+            trendText.textContent = 'Risk Increasing';
+            trendChange.innerHTML = `<span style="color: #e74c3c;">⬆ +${difference.toFixed(2)}% (${percentChange}%)</span>`;
+            trendText.style.color = '#e74c3c';
+        } else if (difference < 0) {
+            // Risk decreasing (good trend)
+            trendIcon.innerHTML = '📉';
+            trendText.textContent = 'Risk Decreasing';
+            trendChange.innerHTML = `<span style="color: #27ae60;">⬇ ${difference.toFixed(2)}% (${percentChange}%)</span>`;
+            trendText.style.color = '#27ae60';
+        } else {
+            // No change
+            trendIcon.innerHTML = '➡️';
+            trendText.textContent = 'No Change';
+            trendChange.innerHTML = '<span style="color: #3498db;">Risk stable</span>';
+            trendText.style.color = '#3498db';
+        }
+    }
+
+    // Initialize displays on page load
+    window.addEventListener('load', function() {
+        updateScoresList();
+        updateTrendAnalysis();
+    });
+</script>
+{% endblock %}
