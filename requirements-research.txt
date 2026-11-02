@@ -1,0 +1,8 @@
+-r requirements.txt
+matplotlib==3.8.4
+seaborn==0.13.2
+shap==0.44.1
+plotly==5.16.1
+streamlit==1.41.1
+gunicorn==23.0.0
+python-dotenv==1.0.1
