@@ -1,26 +1,30 @@
-from flask import Flask, render_template, request, jsonify, session, redirect, url_for
-from functools import wraps
-import pandas as pd
-import numpy as np
+from pathlib import Path
+
 import joblib
-import os
+import numpy as np
+import pandas as pd
+from flask import Flask, jsonify, redirect, render_template, request, session, url_for
+from functools import wraps
 from datetime import datetime
-import json
+import os
+
+PROJECT_DIR = Path(__file__).resolve().parent
+MODEL_PATH = PROJECT_DIR / "models" / "academic_risk_xgboost.pkl"
 
 app = Flask(__name__)
-app.secret_key = os.environ.get('FLASK_SECRET_KEY') or os.urandom(32)
+app.secret_key = os.environ.get("FLASK_SECRET_KEY") or os.urandom(32)
 
 # Load the trained model
 model = None
 try:
-    if os.path.exists('academic_risk_xgboost.pkl'):
-        model = joblib.load('academic_risk_xgboost.pkl')
+    if MODEL_PATH.exists():
+        model = joblib.load(MODEL_PATH)
     else:
-        print("⚠️ Model file not found. Please run main.py first to train the model.")
+        print(f"Model file not found at {MODEL_PATH}. Please run main.py first.")
 except Exception as e:
-    print(f"❌ Error loading model: {e}")
+    print(f"Error loading model: {e}")
 
-# Simple user database (for scalability, use real database)
+# Simple demo user database (replace with a database for production use)
 USERS = {
     'admin': 'admin123',
     'educator': 'educator@123',
@@ -50,17 +54,16 @@ def login():
     logout_param = request.args.get('logout')
     if logout_param:
         session.pop('user', None)
-    
+
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
-        
+
         if username in USERS and USERS[username] == password:
             session['user'] = username
             return redirect(url_for('dashboard'))
-        else:
-            return render_template('login.html', error='Invalid credentials')
-    
+        return render_template('login.html', error='Invalid credentials')
+
     return render_template('login.html')
 
 @app.route('/dashboard')
@@ -74,10 +77,10 @@ def predict():
     try:
         if model is None:
             return jsonify({'error': 'Model not loaded. Please train the model first.'}), 400
-        
+
         data = request.json
-        
-        # Extract features in the correct order
+
+        # Extract features in the order used during model training
         features = [
             float(data.get('age', 0)),
             float(data.get('gender', 0)),
@@ -92,28 +95,28 @@ def predict():
             float(data.get('music', 0)),
             float(data.get('volunteering', 0))
         ]
-        
+
         # Make prediction
         features_array = np.array([features])
         prediction = model.predict(features_array)[0]
         probability = model.predict_proba(features_array)[0]
-        
+
         result = {
             'risk': 'At Risk' if prediction == 1 else 'Not At Risk',
             'risk_score': float(probability[1]) * 100,
             'confidence': max(float(probability[0]), float(probability[1])) * 100,
             'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         }
-        
+
         # Store in history
         prediction_history.append({
             'user': session['user'],
             'data': data,
             'result': result
         })
-        
+
         return jsonify(result)
-    
+
     except Exception as e:
         return jsonify({'error': str(e)}), 400
 
@@ -121,7 +124,7 @@ def predict():
 @login_required
 def get_history():
     user_history = [h for h in prediction_history if h['user'] == session['user']]
-    return jsonify(user_history[-10:])  # Return last 10 predictions
+    return jsonify(user_history[-10:])
 
 @app.route('/logout')
 def logout():

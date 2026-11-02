@@ -8,10 +8,15 @@ from xgboost import XGBClassifier
 from sklearn.metrics import accuracy_score, classification_report
 import joblib
 import warnings
+from pathlib import Path
 warnings.filterwarnings('ignore')
 
+PROJECT_DIR = Path(__file__).resolve().parent
+DATA_PATH = PROJECT_DIR / 'data' / 'Student_performance_data _.csv'
+MODEL_PATH = PROJECT_DIR / 'models' / 'academic_risk_xgboost.pkl'
+
 # ── LOAD DATA ─────────────────────────────────────────────
-df = pd.read_csv("Student_performance_data _.csv")
+df = pd.read_csv(DATA_PATH)
 df['AcademicRisk'] = (df['GPA'] < 2.0).astype(int)
 
 # ── STAGE 3 — PREPROCESSING ───────────────────────────────
@@ -83,7 +88,7 @@ plt.tight_layout()
 plt.show()
 
 # ── SAVE XGBOOST MODEL ────────────────────────────────────
-joblib.dump(xgb, 'academic_risk_xgboost.pkl')
+joblib.dump(xgb, MODEL_PATH)
 print("\n✅ XGBoost model saved as academic_risk_xgboost.pkl")
 from sklearn.model_selection import GridSearchCV
 
@@ -121,7 +126,7 @@ print(classification_report(y_test, best_pred,
       target_names=['Not At Risk', 'At Risk']))
 
 # Save tuned model
-joblib.dump(best_xgb, 'academic_risk_xgboost.pkl')
+joblib.dump(best_xgb, MODEL_PATH)
 print("\n✅ Tuned XGBoost saved!")
 
 print("\n🔄 Generating Feature Importance Analysis...")
