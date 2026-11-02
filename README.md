@@ -40,7 +40,7 @@ Use Python 3.12 and create a virtual environment:
 
 ```bash
 python -m venv .venv
-.venv\Scripts\activate
+.venv\\Scripts\\activate
 pip install -r requirements.txt
 python app.py
 ```
@@ -67,6 +67,8 @@ python main.py
 The script reads `data/Student_performance_data _.csv` and saves the trained XGBoost model in two formats: a compact JSON tree model for the web app and a pickle artifact for Python research.
 
 ## Deploy to Vercel
+
+**Live application:** [academic-risk-predictor-eta.vercel.app](https://academic-risk-predictor-eta.vercel.app)
 
 The repository is configured for Vercel’s Python 3.12 runtime. The web app uses the compact JSON model and Python’s standard library for inference, keeping the serverless bundle small. Import the GitHub repository as a new Vercel project, keep the project root at the repository root, and add `FLASK_SECRET_KEY` as a Production environment variable before deploying. Vercel detects the Flask application in `app.py`.
 
