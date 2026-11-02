@@ -20,7 +20,8 @@ A student academic-risk research project with a model-training workflow, explain
 ├── data/
 │   └── Student_performance_data _.csv
 ├── models/
-│   └── academic_risk_xgboost.pkl  # Trained model used by the web application
+│   ├── academic_risk_xgboost.json # Compact tree model used by the web app
+│   └── academic_risk_xgboost.pkl  # Full model artifact for Python research
 ├── templates/                     # Flask HTML templates
 ├── static/                        # CSS and JavaScript assets
 ├── assets/
@@ -63,11 +64,11 @@ pip install -r requirements-research.txt
 python main.py
 ```
 
-The script reads `data/Student_performance_data _.csv` and saves the trained XGBoost model to `models/academic_risk_xgboost.pkl`.
+The script reads `data/Student_performance_data _.csv` and saves the trained XGBoost model in two formats: a compact JSON tree model for the web app and a pickle artifact for Python research.
 
 ## Deploy to Vercel
 
-The repository is configured for Vercel’s Python 3.12 runtime. Import this GitHub repository as a new Vercel project, keep the project root at the repository root, and add `FLASK_SECRET_KEY` as a Production environment variable before deploying. Vercel detects the Flask application in `app.py`.
+The repository is configured for Vercel’s Python 3.12 runtime. The web app uses the compact JSON model and Python’s standard library for inference, keeping the serverless bundle small. Import the GitHub repository as a new Vercel project, keep the project root at the repository root, and add `FLASK_SECRET_KEY` as a Production environment variable before deploying. Vercel detects the Flask application in `app.py`.
 
 ## Research materials
 

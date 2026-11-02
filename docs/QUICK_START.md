@@ -18,6 +18,6 @@ pip install -r requirements-research.txt
 python main.py
 ```
 
-The script reads `data/Student_performance_data _.csv` and writes the model to `models/academic_risk_xgboost.pkl`.
+The script reads `data/Student_performance_data _.csv` and writes the research model to `models/academic_risk_xgboost.pkl` plus a compact JSON tree model for the web app at `models/academic_risk_xgboost.json`.
 
 For the project overview, repository layout, Vercel setup, and research files, see the [main README](../README.md).

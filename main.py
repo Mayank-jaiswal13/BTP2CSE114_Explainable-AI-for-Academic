@@ -8,12 +8,25 @@ from xgboost import XGBClassifier
 from sklearn.metrics import accuracy_score, classification_report
 import joblib
 import warnings
+import json
 from pathlib import Path
 warnings.filterwarnings('ignore')
 
 PROJECT_DIR = Path(__file__).resolve().parent
 DATA_PATH = PROJECT_DIR / 'data' / 'Student_performance_data _.csv'
 MODEL_PATH = PROJECT_DIR / 'models' / 'academic_risk_xgboost.pkl'
+MODEL_JSON_PATH = PROJECT_DIR / 'models' / 'academic_risk_xgboost.json'
+
+def save_serverless_model(classifier):
+    booster = classifier.get_booster()
+    learner = json.loads(booster.save_config())['learner']
+    model_data = {
+        'base_score': float(learner['learner_model_param']['base_score']),
+        'objective': learner['objective']['name'],
+        'feature_names': booster.feature_names,
+        'trees': [json.loads(tree) for tree in booster.get_dump(dump_format='json')]
+    }
+    MODEL_JSON_PATH.write_text(json.dumps(model_data, separators=(',', ':')), encoding='utf-8')
 
 # ── LOAD DATA ─────────────────────────────────────────────
 df = pd.read_csv(DATA_PATH)
@@ -90,6 +103,7 @@ plt.show()
 # ── SAVE XGBOOST MODEL ────────────────────────────────────
 joblib.dump(xgb, MODEL_PATH)
 print("\n✅ XGBoost model saved as academic_risk_xgboost.pkl")
+save_serverless_model(xgb)
 from sklearn.model_selection import GridSearchCV
 
 print("\n🔄 Tuning XGBoost...")
@@ -128,6 +142,7 @@ print(classification_report(y_test, best_pred,
 # Save tuned model
 joblib.dump(best_xgb, MODEL_PATH)
 print("\n✅ Tuned XGBoost saved!")
+save_serverless_model(best_xgb)
 
 print("\n🔄 Generating Feature Importance Analysis...")
 

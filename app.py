@@ -1,28 +1,45 @@
 from pathlib import Path
-
-import joblib
-import numpy as np
-import pandas as pd
+import json
+import math
 from flask import Flask, jsonify, redirect, render_template, request, session, url_for
 from functools import wraps
 from datetime import datetime
 import os
 
 PROJECT_DIR = Path(__file__).resolve().parent
-MODEL_PATH = PROJECT_DIR / "models" / "academic_risk_xgboost.pkl"
+MODEL_PATH = PROJECT_DIR / "models" / "academic_risk_xgboost.json"
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY") or os.urandom(32)
 
-# Load the trained model
+# Load the compact JSON model used for serverless inference
 model = None
 try:
     if MODEL_PATH.exists():
-        model = joblib.load(MODEL_PATH)
+        model = json.loads(MODEL_PATH.read_text(encoding="utf-8"))
     else:
         print(f"Model file not found at {MODEL_PATH}. Please run main.py first.")
 except Exception as e:
     print(f"Error loading model: {e}")
+
+
+def predict_risk_probability(features):
+    """Return the positive-class probability from the exported XGBoost trees."""
+    base_score = float(model["base_score"])
+    margin = math.log(base_score / (1 - base_score))
+
+    for tree in model["trees"]:
+        node = tree
+        while "leaf" not in node:
+            value = features[node["split"]]
+            branch_id = node["yes"] if value < float(node["split_condition"]) else node["no"]
+            node = next(child for child in node["children"] if child["nodeid"] == branch_id)
+        margin += float(node["leaf"])
+
+    if margin >= 0:
+        return 1 / (1 + math.exp(-margin))
+    exp_margin = math.exp(margin)
+    return exp_margin / (1 + exp_margin)
 
 # Simple demo user database (replace with a database for production use)
 USERS = {
@@ -80,31 +97,29 @@ def predict():
 
         data = request.json
 
-        # Extract features in the order used during model training
-        features = [
-            float(data.get('age', 0)),
-            float(data.get('gender', 0)),
-            float(data.get('ethnicity', 0)),
-            float(data.get('parental_education', 0)),
-            float(data.get('study_time', 0)),
-            float(data.get('absences', 0)),
-            float(data.get('tutoring', 0)),
-            float(data.get('parental_support', 0)),
-            float(data.get('extracurricular', 0)),
-            float(data.get('sports', 0)),
-            float(data.get('music', 0)),
-            float(data.get('volunteering', 0))
-        ]
+        # Map the form fields to the feature names stored in the exported model.
+        features = {
+            'Age': float(data.get('age', 0)),
+            'Gender': float(data.get('gender', 0)),
+            'Ethnicity': float(data.get('ethnicity', 0)),
+            'ParentalEducation': float(data.get('parental_education', 0)),
+            'StudyTimeWeekly': float(data.get('study_time', 0)),
+            'Absences': float(data.get('absences', 0)),
+            'Tutoring': float(data.get('tutoring', 0)),
+            'ParentalSupport': float(data.get('parental_support', 0)),
+            'Extracurricular': float(data.get('extracurricular', 0)),
+            'Sports': float(data.get('sports', 0)),
+            'Music': float(data.get('music', 0)),
+            'Volunteering': float(data.get('volunteering', 0))
+        }
 
-        # Make prediction
-        features_array = np.array([features])
-        prediction = model.predict(features_array)[0]
-        probability = model.predict_proba(features_array)[0]
+        risk_probability = predict_risk_probability(features)
+        prediction = int(risk_probability >= 0.5)
 
         result = {
             'risk': 'At Risk' if prediction == 1 else 'Not At Risk',
-            'risk_score': float(probability[1]) * 100,
-            'confidence': max(float(probability[0]), float(probability[1])) * 100,
+            'risk_score': risk_probability * 100,
+            'confidence': max(risk_probability, 1 - risk_probability) * 100,
             'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         }
 
